@@ -13,18 +13,37 @@ import {
   EmptyDocumentError,
 } from "../errors";
 
+/**
+ * All document + line-item business logic: ownership checks, the
+ * draft-only edit guard, and persisting calc/calc.ts's results onto
+ * models/Document.model.ts. Called from controllers/document.controller.ts,
+ * routed from routes/document.routes.ts (mounted at /documents in index.ts).
+ * Every mutation below ends in recalcTotals()+save() — that's what lets
+ * services/report.service.ts trust doc.totals without ever recomputing it.
+ */
+
 type LineItemInput = z.infer<typeof lineItemInputSchema>;
 
+/**
+ * 404 whether the document is missing or just belongs to someone else —
+ * same response either way, so a document ID can't be used to probe
+ * whether it exists for another user.
+ */
 async function getOwnedDocument(documentId: string, userId: string) {
   const doc = await PricingDocument.findOne({ _id: documentId, owner: userId });
   if (!doc) throw new DocumentNotFoundError();
   return doc;
 }
 
+/** The one guard every mutating function below calls first. */
 function assertEditable(doc: IPricingDocument) {
   if (doc.status === "finalized") throw new DocumentNotEditableError();
 }
 
+/**
+ * Runs the raw input through calc/calc.ts and merges the result back in —
+ * this is the only place a line item's persisted numbers get produced.
+ */
 function buildLineItem(input: LineItemInput) {
   return { ...input, ...calcLine(input) };
 }
@@ -123,6 +142,10 @@ export async function deleteLineItem(
   return doc;
 }
 
+/**
+ * No recompute here on purpose — every path above already keeps
+ * doc.totals correct, so finalize just flips status and stamps a time.
+ */
 export async function finalizeDocument(userId: string, documentId: string) {
   const doc = await getOwnedDocument(documentId, userId);
   if (doc.status === "finalized") throw new DocumentAlreadyFinalizedError();

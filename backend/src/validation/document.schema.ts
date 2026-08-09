@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+/**
+ * Request-body shapes for controllers/document.controller.ts.
+ * lineItemInputSchema doubles as what services/document.service.ts hands to
+ * calc/calc.ts's calcLine() — the only extra field is `description`, which
+ * calc doesn't need and just ignores.
+ */
+
 const discountSchema = z
   .union([
     z.object({

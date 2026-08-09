@@ -4,6 +4,14 @@ import mongoose, {
   Types,
 } from "mongoose";
 
+/**
+ * The pricing document — metadata, embedded line items, and a persisted
+ * totals summary. All writes go through services/document.service.ts,
+ * which is the only thing that calls calc/calc.ts and saves the result
+ * here; nothing recomputes totals on read. services/report.service.ts
+ * aggregates the `totals` field directly for that reason.
+ * Shapes below deliberately mirror calc/calc.ts's types.
+ */
 export interface IDiscount {
   type: "fixed" | "percent";
   value: number;
@@ -34,6 +42,7 @@ export interface IPricingDocument extends MongooseDocument {
   customer: string;
   issueDate: Date;
   status: "draft" | "finalized";
+  /** DocumentArray, not a plain array — that's what gives us .id() in document.service.ts */
   lineItems: Types.DocumentArray<ILineItem>;
   totals: ITotals;
   finalizedAt: Date | null;

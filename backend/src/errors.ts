@@ -1,3 +1,9 @@
+/**
+ * Domain errors, one per case that needs a specific HTTP status.
+ * Thrown from services/*.ts, caught in exactly one place —
+ * middleware/errorHandler.ts — so nothing in services/ or controllers/
+ * ever touches res.status() directly.
+ */
 export class AppError extends Error {
   constructor(
     message: string,

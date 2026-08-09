@@ -2,6 +2,11 @@ import { Router } from "express";
 import { requireAuth } from "../middleware/requireAuth";
 import * as controller from "../controllers/document.controller";
 
+/**
+ * Every route below requires a valid session — see middleware/requireAuth.ts
+ * for what that guards, and controllers/document.controller.ts for the
+ * actual handlers.
+ */
 const router = Router();
 router.use(requireAuth);
 

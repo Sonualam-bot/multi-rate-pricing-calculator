@@ -7,6 +7,11 @@ import {
 } from "../services/auth.service";
 import { asyncHandler } from "../utils/asyncHandler";
 
+/**
+ * Thin HTTP layer for auth — parse/validate, call services/auth.service.ts,
+ * shape the response. Routed from routes/auth.routes.ts (mounted at /auth).
+ */
+
 const COOKIE_NAME = "token";
 
 function setAuthCookie(res: Response, token: string) {

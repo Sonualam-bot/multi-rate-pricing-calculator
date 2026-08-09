@@ -3,6 +3,12 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User.model";
 import { EmailAlreadyExistsError, InvalidCredentialsError } from "../errors";
 
+/**
+ * Signup/login logic — hashing, credential checks, token issuing.
+ * Called from controllers/auth.controller.ts; thrown errors are the
+ * classes in ../errors.ts, caught centrally by middleware/errorHandler.ts.
+ */
+
 const SALT_ROUNDS = 10;
 
 export async function createUser(email: string, password: string) {
@@ -23,6 +29,10 @@ export async function verifyCredentials(email: string, password: string) {
   return user;
 }
 
+/**
+ * Payload is just the id on purpose — JWTs are signed, not encrypted, so
+ * nothing sensitive belongs in here. Verified by middleware/requireAuth.ts.
+ */
 export function generateToken(userId: string) {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error("JWT_SECRET is not set");

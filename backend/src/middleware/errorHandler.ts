@@ -4,6 +4,14 @@ import mongoose from "mongoose";
 import { AppError } from "../errors";
 import { InvalidDiscountError } from "../calc/calc";
 
+/**
+ * The one place a thrown error becomes an HTTP response. Knows about
+ * errors.ts's AppError family, calc/calc.ts's InvalidDiscountError, Zod's
+ * validation errors, and Mongoose's CastError (bad ObjectId in a URL) —
+ * anything else falls through to a plain 500. Mounted last in index.ts,
+ * after every route, since Express only routes errors to middleware
+ * registered after the one that called next(err).
+ */
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ZodError) {
     return res.status(400).json({

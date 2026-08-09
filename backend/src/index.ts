@@ -6,6 +6,15 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import documentRoutes from "./routes/document.routes";
+import reportRoutes from "./routes/report.routes";
+
+/**
+ * Entry point — wires middleware, mounts routes/*.routes.ts, and starts
+ * the server only after config/db.ts confirms a DB connection.
+ * Request flow for any endpoint: routes/ -> controllers/ -> services/
+ * (-> calc/ for money math) -> models/, with errors bubbling up through
+ * middleware/errorHandler.ts, mounted last below.
+ */
 
 dotenv.config();
 
@@ -23,7 +32,13 @@ app.use(cookieParser());
 
 app.use("/auth", authRoutes);
 app.use("/documents", documentRoutes);
+app.use("/reports", reportRoutes);
 
+/**
+ * Must be mounted after every route it's meant to catch — Express only
+ * routes a next(err) call to error middleware registered below the route
+ * that raised it. Any new route needs to go above this line, not below.
+ */
 app.use(errorHandler);
 
 app.get("/health", (req, res) => {

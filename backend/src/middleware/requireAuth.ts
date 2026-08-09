@@ -5,6 +5,12 @@ export interface AuthedRequest extends Request {
   userId?: string;
 }
 
+/**
+ * Reads the httpOnly cookie set by controllers/auth.controller.ts's
+ * setAuthCookie(), verifies it, and attaches req.userId — every downstream
+ * service scopes its queries by this (see getOwnedDocument in
+ * services/document.service.ts, for example).
+ */
 export function requireAuth(
   req: AuthedRequest,
   res: Response,

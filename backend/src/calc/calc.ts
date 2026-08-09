@@ -1,3 +1,11 @@
+/**
+ * Pure money math, nothing else — no Express, no Mongoose, no async.
+ * Every cent that ends up on a document passes through calcLine() first.
+ * Called from services/document.service.ts (buildLineItem/recalcTotals),
+ * and the shapes here are what models/Document.model.ts's line-item schema
+ * is built to store — same field names on purpose, no reshaping needed.
+ */
+
 export type Discount = { type: "fixed" | "percent"; value: number } | null;
 
 export type LineItemInput = {
@@ -14,6 +22,7 @@ export type LineResult = {
   lineTotalCents: number;
 };
 
+/** Fixed discount bigger than the line subtotal — reject, don't clamp. Turned into a 400 by middleware/errorHandler.ts. */
 export class InvalidDiscountError extends Error {
   constructor(message: string) {
     super(message);
@@ -25,6 +34,7 @@ function roundCents(value: number): number {
   return Math.round(value);
 }
 
+/** subtotal -> discount -> tax -> lineTotal, in that order, for one line item. Rounding (round-half-up) happens after discount and after tax, never before. */
 export function calcLine(input: LineItemInput): LineResult {
   const { quantity, unitPriceCents, discount, taxPercent } = input;
 
@@ -51,6 +61,7 @@ export function calcLine(input: LineItemInput): LineResult {
   return { subtotalCents, discountCents, taxCents, lineTotalCents };
 }
 
+/** Sums already-computed line results — never recalculates a line, just adds up what calcLine() already produced. */
 export function calcDocumentTotals(lines: LineResult[]) {
   return lines.reduce(
     (totals, line) => ({

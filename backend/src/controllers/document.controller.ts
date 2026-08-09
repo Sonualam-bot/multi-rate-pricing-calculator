@@ -8,6 +8,13 @@ import {
 import * as documentService from "../services/document.service";
 import { asyncHandler } from "../utils/asyncHandler";
 
+/**
+ * Thin HTTP layer for documents/line-items — parse/validate, call
+ * services/document.service.ts, shape the response. All the actual rules
+ * (ownership, draft-only edits, totals recompute) live in that service.
+ * Routed from routes/document.routes.ts (mounted at /documents).
+ */
+
 export const create = asyncHandler(
   async (req: AuthedRequest, res: Response) => {
     const input = createDocumentSchema.parse(req.body);
