@@ -5,6 +5,7 @@ import { connectDB } from "./config/db";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import { errorHandler } from "./middleware/errorHandler";
+import documentRoutes from "./routes/document.routes";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRoutes);
+app.use("/documents", documentRoutes);
 
 app.use(errorHandler);
 

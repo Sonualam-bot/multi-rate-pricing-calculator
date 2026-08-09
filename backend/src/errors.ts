@@ -19,3 +19,33 @@ export class InvalidCredentialsError extends AppError {
     super("Invalid email or password", 401);
   }
 }
+
+export class DocumentNotFoundError extends AppError {
+  constructor() {
+    super("Document not found", 404);
+  }
+}
+
+export class DocumentNotEditableError extends AppError {
+  constructor() {
+    super("Cannot modify a finalized document", 409);
+  }
+}
+
+export class LineItemNotFoundError extends AppError {
+  constructor() {
+    super("Line item not found", 404);
+  }
+}
+
+export class DocumentAlreadyFinalizedError extends AppError {
+  constructor() {
+    super("Document is already finalized", 409);
+  }
+}
+
+export class EmptyDocumentError extends AppError {
+  constructor() {
+    super("Cannot finalize a document with no line items", 400);
+  }
+}

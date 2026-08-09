@@ -34,7 +34,7 @@ export interface IPricingDocument extends MongooseDocument {
   customer: string;
   issueDate: Date;
   status: "draft" | "finalized";
-  lineItems: ILineItem[];
+  lineItems: Types.DocumentArray<ILineItem>;
   totals: ITotals;
   finalizedAt: Date | null;
 }
