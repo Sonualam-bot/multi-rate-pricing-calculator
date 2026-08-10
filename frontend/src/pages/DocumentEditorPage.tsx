@@ -1,15 +1,17 @@
 import { Link, useParams } from "react-router-dom";
 import { useDocument } from "../hooks/useDocument";
 import { DocumentMetaSection } from "../components/DocumentMetaSection";
+import { LineItemsSection } from "../components/LineItemsSection";
+import { TotalsSummary } from "../components/TotalsSummary";
+import { FinalizeButton } from "../components/FinalizeButton";
 
 /**
  * Editor screen for one document, routed at /documents/:id (see App.tsx).
  * Owns nothing beyond the fetch (via hooks/useDocument.ts) and the derived
- * `editable` flag — every actual section (meta, line items, finalize) is
- * its own component so each one's local form/UI state stays scoped to just
+ * `editable` flag — every actual section (meta, line items, totals) is its
+ * own component so each one's local form/UI state stays scoped to just
  * that piece, the same split DocumentsListPage uses for NewDocumentForm/
- * DocumentRow. Line items + finalize are a follow-up pass; this page
- * currently only wires up the meta section.
+ * DocumentRow. Finalize is still a follow-up pass.
  *
  * The `!loading && !error && document` guard below exists purely for
  * TypeScript: useDocument's `document` is typed `PricingDocument | null`,
@@ -20,7 +22,16 @@ import { DocumentMetaSection } from "../components/DocumentMetaSection";
  */
 export function DocumentEditorPage() {
   const { id } = useParams<{ id: string }>();
-  const { document, loading, error, updateMeta } = useDocument(id!);
+  const {
+    document,
+    loading,
+    error,
+    updateMeta,
+    addLineItem,
+    updateLineItem,
+    deleteLineItem,
+    finalize,
+  } = useDocument(id!);
 
   return (
     <div>
@@ -33,11 +44,27 @@ export function DocumentEditorPage() {
       {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
       {!loading && !error && document && (
-        <DocumentMetaSection
-          document={document}
-          editable={document.status === "draft"}
-          onSave={updateMeta}
-        />
+        <>
+          <DocumentMetaSection
+            document={document}
+            editable={document.status === "draft"}
+            onSave={updateMeta}
+          />
+          <LineItemsSection
+            lineItems={document.lineItems}
+            editable={document.status === "draft"}
+            onAdd={addLineItem}
+            onUpdate={updateLineItem}
+            onDelete={deleteLineItem}
+          />
+          <TotalsSummary totals={document.totals} />
+          {document.status === "draft" && (
+            <FinalizeButton
+              lineItemCount={document.lineItems.length}
+              onFinalize={finalize}
+            />
+          )}
+        </>
       )}
     </div>
   );

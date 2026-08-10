@@ -6,6 +6,7 @@ import type {
 } from "../types/document";
 import { ApiError } from "../api/client";
 import { formatDate } from "../utils/format";
+import { StatusBadge } from "./StatusBadge";
 
 interface Props {
   document: PricingDocument;
@@ -62,7 +63,10 @@ export function DocumentMetaSection({ document, editable, onSave }: Props) {
       <div className="mt-6 rounded-lg border bg-white p-4">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">{document.title}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold">{document.title}</h1>
+              <StatusBadge status={document.status} />
+            </div>
             <p className="mt-1 text-sm text-gray-500">
               {document.customer} · {formatDate(document.issueDate)}
             </p>
