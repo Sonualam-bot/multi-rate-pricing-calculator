@@ -48,6 +48,13 @@ export interface IPricingDocument extends MongooseDocument {
   finalizedAt: Date | null;
 }
 
+function idTransform(_doc: unknown, ret: Record<string, any>) {
+  ret.id = ret._id.toString();
+  delete ret._id;
+  delete ret.__v;
+  return ret;
+}
+
 const discountSchema = new Schema<IDiscount>(
   {
     type: {
@@ -63,46 +70,49 @@ const discountSchema = new Schema<IDiscount>(
   { _id: false },
 );
 
-const lineItemSchema = new Schema<ILineItem>({
-  description: {
-    type: String,
-    required: true,
+const lineItemSchema = new Schema<ILineItem>(
+  {
+    description: {
+      type: String,
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    unitPriceCents: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    discount: {
+      type: discountSchema,
+      default: null,
+    },
+    taxPercent: {
+      type: Number,
+      default: 0,
+    },
+    subtotalCents: {
+      type: Number,
+      required: true,
+    },
+    discountCents: {
+      type: Number,
+      required: true,
+    },
+    taxCents: {
+      type: Number,
+      required: true,
+    },
+    lineTotalCents: {
+      type: Number,
+      required: true,
+    },
   },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  unitPriceCents: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  discount: {
-    type: discountSchema,
-    default: null,
-  },
-  taxPercent: {
-    type: Number,
-    default: 0,
-  },
-  subtotalCents: {
-    type: Number,
-    required: true,
-  },
-  discountCents: {
-    type: Number,
-    required: true,
-  },
-  taxCents: {
-    type: Number,
-    required: true,
-  },
-  lineTotalCents: {
-    type: Number,
-    required: true,
-  },
-});
+  { toJSON: { virtuals: true, transform: idTransform } },
+);
 
 const totalsSchema = new Schema<ITotals>(
   {
@@ -168,7 +178,7 @@ const documentSchema = new Schema<IPricingDocument>(
       default: null,
     },
   },
-  { timestamps: true },
+  { timestamps: true, toJSON: { virtuals: true, transform: idTransform } },
 );
 
 documentSchema.index({ owner: 1, issueDate: 1 });
