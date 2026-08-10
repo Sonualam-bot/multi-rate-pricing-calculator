@@ -22,6 +22,7 @@ export function useReport(from: string, to: string) {
      */
     let cancelled = false;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting loading/error on range-change is the documented React fetch-in-effect pattern; this rule flags it as a false positive.
     setLoading(true);
     setError(null);
 

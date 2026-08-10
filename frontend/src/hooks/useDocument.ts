@@ -41,6 +41,7 @@ export function useDocument(id: string) {
   }, [id]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount/id-change is the documented React pattern (react.dev/learn/you-might-not-need-an-effect#fetching-data); this rule flags it as a false positive.
     refresh();
   }, [refresh]);
 

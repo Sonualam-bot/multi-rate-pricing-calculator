@@ -34,19 +34,28 @@ export function useDocuments() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount is the documented React pattern (react.dev/learn/you-might-not-need-an-effect#fetching-data); this rule flags it as a false positive.
     refresh();
   }, [refresh]);
 
   /**
-   * Prepends the server's response instead of calling refresh() again —
-   * one request instead of two. Errors are left to throw so whatever
-   * form/button triggered this can catch and display them itself, rather
-   * than funneling into the hook's own `error` (that one's for the
-   * mount-time fetch, which no specific UI element is watching).
+   * Inserts the server's response instead of calling refresh() again —
+   * one request instead of two — but re-sorts by issueDate to match
+   * services/document.service.ts's listDocuments() (sorted issueDate
+   * desc), since a backdated document isn't necessarily the newest by
+   * that key even though it was just created. Errors are left to throw
+   * so whatever form/button triggered this can catch and display them
+   * itself, rather than funneling into the hook's own `error` (that
+   * one's for the mount-time fetch, which no specific UI element is
+   * watching).
    */
   async function createDocument(input: CreateDocumentInput) {
     const doc = await documentsApi.createDocument(input);
-    setDocuments((prev) => [doc, ...prev]);
+    setDocuments((prev) =>
+      [doc, ...prev].sort(
+        (a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime(),
+      ),
+    );
     return doc;
   }
 
