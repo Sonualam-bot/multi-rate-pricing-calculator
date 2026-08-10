@@ -17,3 +17,7 @@ export function login(email: string, password: string) {
 export function logout() {
   return request<void>("/auth/logout", { method: "POST" });
 }
+
+export function me() {
+  return request<User>("/auth/me");
+}
