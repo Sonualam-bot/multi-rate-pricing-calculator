@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     authApi
       .me()
-      .then(setUser)
+      .then((currentUser) => setUser(currentUser))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
   }, []);
@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components -- provider + hook living together is the standard context pattern; splitting into two files for one hook is unwarranted fragmentation.
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
