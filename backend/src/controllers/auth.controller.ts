@@ -4,8 +4,10 @@ import {
   createUser,
   verifyCredentials,
   generateToken,
+  getUserById,
 } from "../services/auth.service";
 import { asyncHandler } from "../utils/asyncHandler";
+import { AuthedRequest } from "../middleware/requireAuth";
 
 /**
  * Thin HTTP layer for auth — parse/validate, call services/auth.service.ts,
@@ -40,4 +42,9 @@ export const login = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (_req, res) => {
   res.clearCookie(COOKIE_NAME);
   res.status(204).send();
+});
+
+export const me = asyncHandler(async (req: AuthedRequest, res: Response) => {
+  const user = await getUserById(req.userId!);
+  res.json({ id: user.id, email: user.email });
 });

@@ -1,7 +1,11 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.model";
-import { EmailAlreadyExistsError, InvalidCredentialsError } from "../errors";
+import {
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  SessionUserNotFoundError,
+} from "../errors";
 
 /**
  * Signup/login logic — hashing, credential checks, token issuing.
@@ -37,4 +41,10 @@ export function generateToken(userId: string) {
   const secret = process.env.JWT_SECRET;
   if (!secret) throw new Error("JWT_SECRET is not set");
   return jwt.sign({ sub: userId }, secret, { expiresIn: "7d" });
+}
+
+export async function getUserById(userId: string) {
+  const user = await User.findById(userId);
+  if (!user) throw new SessionUserNotFoundError();
+  return user;
 }

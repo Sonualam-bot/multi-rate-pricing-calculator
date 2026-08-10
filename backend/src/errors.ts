@@ -55,3 +55,9 @@ export class EmptyDocumentError extends AppError {
     super("Cannot finalize a document with no line items", 400);
   }
 }
+
+export class SessionUserNotFoundError extends AppError {
+  constructor() {
+    super("Not authenticated", 401);
+  }
+}
