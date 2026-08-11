@@ -111,7 +111,7 @@ All money is handled as **integer cents** end to end — request bodies, databas
 - Finalizing requires **at least one line item** — a defensive check beyond what the spec asks for, since a zero-line "finalized invoice" isn't meaningful.
 - Once `finalized`, **every** mutation is rejected with `409 Cannot modify a finalized document`: metadata edits, line item add/edit/delete, and — by our reading of "read-only" — **deleting the document itself**. Permanently destroying a finalized record would undermine the reason it was locked in the first place.
 - Re-finalizing an already-finalized document is rejected with its own `409 Document is already finalized`.
-- **Duplicate finalized → new draft** (stretch goal): not implemented. Skipped for time; the shape it would take is straightforward — copy `title`/`customer`/line items (input fields only, dropping the computed cents fields) into a fresh draft document.
+- **Duplicate → new draft** (stretch goal): implemented via `POST /documents/:id/duplicate`. Copies `customer` and line items — input fields only (`description`/`quantity`/`unitPriceCents`/`discount`/`taxPercent`), never the computed cents fields, since the duplicate is created through the same `createDocument` path a brand-new document takes, so totals get recomputed from scratch rather than copied. `title` gets a **numbered** suffix ("Sugar" → "Sugar 1" → "Sugar 2", scanning the user's existing documents for the highest number already used on that base title) rather than a fixed `" (Copy)"` tag — a fixed tag compounds every time you duplicate a duplicate ("Sugar (Copy) (Copy) (Copy)"), which a number sequence doesn't. Two more deliberate choices beyond the spec's literal ask: it works on a document of **any** status, not just finalized ones (duplicating a draft is the same operation, no reason to forbid it), and the new document's `issueDate` resets to the current date rather than copying the original's, since the duplicate is a new document being created today, not a historical record.
 - **Finalize validation — reject qty ≤ 0 or negative price** (the other stretch goal): not implemented as a separate check, because it's structurally unreachable. `quantity < 1` and negative `unitPriceCents` are already rejected by the request-validation schema on every line item write, so no line item with those values can ever exist in the database to begin with.
 
 ## API reference
@@ -134,6 +134,7 @@ All routes except `/auth/*` require a valid session cookie (`requireAuth` middle
 | PATCH  | `/documents/:id/line-items/:lineItemId` | Update a line item (draft only)                                          |
 | DELETE | `/documents/:id/line-items/:lineItemId` | Delete a line item (draft only)                                          |
 | POST   | `/documents/:id/finalize`               | Finalize a document                                                      |
+| POST   | `/documents/:id/duplicate`              | Copy a document (any status) into a new draft                            |
 | GET    | `/reports/summary?from=&to=`            | Document count + summed totals for finalized documents in the date range |
 
 A document that doesn't exist **or** belongs to another user both return `404 Document not found` — identical responses, on purpose (see below).
