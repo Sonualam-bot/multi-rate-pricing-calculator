@@ -20,5 +20,6 @@ router.post("/:id/line-items", controller.addLineItem);
 router.patch("/:id/line-items/:lineItemId", controller.updateLineItem);
 router.delete("/:id/line-items/:lineItemId", controller.removeLineItem);
 router.post("/:id/finalize", controller.finalize);
+router.post("/:id/duplicate", controller.duplicate);
 
 export default router;

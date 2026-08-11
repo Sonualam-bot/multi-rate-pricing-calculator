@@ -52,6 +52,44 @@ function recalcTotals(doc: IPricingDocument) {
   doc.totals = calcDocumentTotals(doc.lineItems);
 }
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Strips a trailing " <number>" so duplicating an already-numbered
+ * duplicate ("Sugar 1") continues the same sequence ("Sugar 2") instead
+ * of stacking a second number onto it ("Sugar 1 1").
+ */
+function baseTitleOf(title: string): string {
+  return title.replace(/\s+\d+$/, "");
+}
+
+/**
+ * Looks at every document this user owns titled exactly `base` or
+ * `base <number>`, and returns one higher than the largest number found
+ * (1 if there are none yet). This is what keeps repeated duplication
+ * numbered — "Sugar" -> "Sugar 1" -> "Sugar 2" -> ... — instead of
+ * stacking a fixed suffix every time ("Sugar (Copy) (Copy) (Copy)").
+ */
+async function nextDuplicateNumber(
+  userId: string,
+  base: string,
+): Promise<number> {
+  const pattern = new RegExp(`^${escapeRegExp(base)}(?: (\\d+))?$`);
+  const docs = await PricingDocument.find(
+    { owner: userId, title: pattern },
+    { title: 1 },
+  );
+  let max = 0;
+  for (const doc of docs) {
+    const match = doc.title.match(pattern);
+    const num = match?.[1] ? parseInt(match[1], 10) : 0;
+    if (num > max) max = num;
+  }
+  return max + 1;
+}
+
 export async function createDocument(
   userId: string,
   input: {
@@ -69,6 +107,39 @@ export async function createDocument(
     issueDate: input.issueDate,
     lineItems,
     totals: calcDocumentTotals(lineItems),
+  });
+}
+
+/**
+ * Copies a document's input fields into a brand-new draft via
+ * createDocument() itself, rather than duplicating its persistence logic
+ * here — only the raw inputs are copied (description/quantity/
+ * unitPriceCents/discount/taxPercent per line), never the computed cents
+ * fields, since createDocument already recomputes those through calc/calc.ts.
+ * Works on a document of any status, not just finalized ones — there's no
+ * real reason to forbid duplicating a draft too, it's the same operation.
+ * issueDate resets to now rather than copying the original's, since the
+ * duplicate is a new document being created today, not a historical
+ * record. Title gets a numbered suffix ("Sugar" -> "Sugar 1" -> "Sugar 2")
+ * rather than a fixed "(Copy)" tag, so repeatedly duplicating the same
+ * document (or one of its duplicates) never compounds into something like
+ * "Sugar (Copy) (Copy) (Copy)" — see baseTitleOf/nextDuplicateNumber above.
+ */
+export async function duplicateDocument(userId: string, documentId: string) {
+  const original = await getOwnedDocument(documentId, userId);
+  const base = baseTitleOf(original.title);
+  const nextNumber = await nextDuplicateNumber(userId, base);
+  return createDocument(userId, {
+    title: `${base} ${nextNumber}`,
+    customer: original.customer,
+    issueDate: new Date(),
+    lineItems: original.lineItems.map((item) => ({
+      description: item.description,
+      quantity: item.quantity,
+      unitPriceCents: item.unitPriceCents,
+      discount: item.discount,
+      taxPercent: item.taxPercent,
+    })),
   });
 }
 

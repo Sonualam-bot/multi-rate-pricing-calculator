@@ -93,6 +93,16 @@ export const removeLineItem = asyncHandler(
   },
 );
 
+export const duplicate = asyncHandler(
+  async (req: AuthedRequest, res: Response) => {
+    const doc = await documentService.duplicateDocument(
+      req.userId!,
+      req.params.id as string,
+    );
+    res.status(201).json(doc);
+  },
+);
+
 export const finalize = asyncHandler(
   async (req: AuthedRequest, res: Response) => {
     const doc = await documentService.finalizeDocument(
