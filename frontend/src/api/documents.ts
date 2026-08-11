@@ -65,3 +65,9 @@ export function finalizeDocument(id: string) {
     method: "POST",
   });
 }
+
+export function duplicateDocument(id: string) {
+  return request<PricingDocument>(`/documents/${id}/duplicate`, {
+    method: "POST",
+  });
+}

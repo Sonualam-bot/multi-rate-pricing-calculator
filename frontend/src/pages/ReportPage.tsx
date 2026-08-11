@@ -30,8 +30,8 @@ export function ReportPage() {
     <div>
       <h1 className="text-2xl font-semibold">Summary report</h1>
       <p className="mt-1 text-sm text-gray-500">
-        Finalized documents only draft totals can still change, so they're
-        excluded from this report.
+        Finalized documents only — draft totals can still change, so
+        they're excluded from this report.
       </p>
 
       <div className="mt-6 flex items-end gap-4 rounded-lg border bg-white p-4">

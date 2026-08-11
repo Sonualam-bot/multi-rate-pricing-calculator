@@ -4,6 +4,7 @@ import { DocumentMetaSection } from "../components/DocumentMetaSection";
 import { LineItemsSection } from "../components/LineItemsSection";
 import { TotalsSummary } from "../components/TotalsSummary";
 import { FinalizeButton } from "../components/FinalizeButton";
+import { DuplicateButton } from "../components/DuplicateButton";
 
 /**
  * Editor screen for one document, routed at /documents/:id (see App.tsx).
@@ -43,12 +44,15 @@ export function DocumentEditorPage() {
           ← Back to documents
         </Link>
         {document && (
-          <Link
-            to={`/documents/${document.id}/print`}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Print / Save as PDF
-          </Link>
+          <div className="flex items-center gap-4">
+            <DuplicateButton documentId={document.id} />
+            <Link
+              to={`/documents/${document.id}/print`}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Print / Save as PDF
+            </Link>
+          </div>
         )}
       </div>
 
