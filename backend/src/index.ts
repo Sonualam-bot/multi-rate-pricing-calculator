@@ -19,7 +19,6 @@ import reportRoutes from "./routes/report.routes";
 dotenv.config();
 
 const app = express();
-app.use(express.json());
 
 app.use(
   cors({
@@ -29,6 +28,15 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+
+/** Bare root — mainly so visiting the deployed URL directly shows something readable instead of Express's default "Cannot GET /". */
+app.get("/", (_req, res) => {
+  res.json({ status: "ok", service: "mrpc-api" });
+});
+
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 app.use("/auth", authRoutes);
 app.use("/documents", documentRoutes);
@@ -40,12 +48,6 @@ app.use("/reports", reportRoutes);
  * that raised it. Any new route needs to go above this line, not below.
  */
 app.use(errorHandler);
-
-app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-  });
-});
 
 const PORT = process.env.PORT || 4000;
 
