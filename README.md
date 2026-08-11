@@ -2,8 +2,9 @@
 
 Create documents with line items, apply per-line discounts and tax, compute totals server-side, and view a summary report over a date range. Documents move through a draft → finalized lifecycle; once finalized, a document is immutable via the API.
 
-**Live app:** _TODO: add deployed URL_
-**API:** _TODO: add deployed URL_
+**Live app:** https://multi-rate-pricing-calculator-psi.vercel.app
+**API:** https://multi-rate-pricing-calculator-a27a.onrender.com
+**Repo:** https://github.com/Sonualam-bot/multi-rate-pricing-calculator
 
 No account needed to try it — click **Continue as guest** on the login screen. It creates a brand-new, isolated account on the spot (see [Assumptions & tradeoffs](#assumptions--tradeoffs)).
 
@@ -23,8 +24,8 @@ No account needed to try it — click **Continue as guest** on the login screen.
 ### 1. Clone and install
 
 ```bash
-git clone <this-repo-url>
-cd mrpc
+git clone https://github.com/Sonualam-bot/multi-rate-pricing-calculator.git
+cd multi-rate-pricing-calculator
 ```
 
 ### 2. Backend
