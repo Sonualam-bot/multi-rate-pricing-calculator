@@ -8,10 +8,10 @@ import { FinalizeButton } from "../components/FinalizeButton";
 /**
  * Editor screen for one document, routed at /documents/:id (see App.tsx).
  * Owns nothing beyond the fetch (via hooks/useDocument.ts) and the derived
- * `editable` flag — every actual section (meta, line items, totals) is its
- * own component so each one's local form/UI state stays scoped to just
- * that piece, the same split DocumentsListPage uses for NewDocumentForm/
- * DocumentRow. Finalize is still a follow-up pass.
+ * `editable` flag — every actual section (meta, line items, totals,
+ * finalize) is its own component so each one's local form/UI state stays
+ * scoped to just that piece, the same split DocumentsListPage uses for
+ * NewDocumentForm/DocumentRow.
  *
  * The `!loading && !error && document` guard below exists purely for
  * TypeScript: useDocument's `document` is typed `PricingDocument | null`,
@@ -35,9 +35,22 @@ export function DocumentEditorPage() {
 
   return (
     <div>
-      <Link to="/documents" className="text-sm text-blue-600 hover:underline">
-        ← Back to documents
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link
+          to="/documents"
+          className="text-sm text-blue-600 hover:underline"
+        >
+          ← Back to documents
+        </Link>
+        {document && (
+          <Link
+            to={`/documents/${document.id}/print`}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            Print / Save as PDF
+          </Link>
+        )}
+      </div>
 
       {loading && <p className="mt-4 text-sm text-gray-500">Loading…</p>}
 
