@@ -10,6 +10,7 @@ interface AuthContextValue {
   connectionError: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
+  loginAsGuest: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -51,6 +52,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await authApi.signup(email, password));
   }
 
+  async function loginAsGuest() {
+    setUser(await authApi.guest());
+  }
+
   async function logout() {
     await authApi.logout();
     setUser(null);
@@ -58,7 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, connectionError, login, signup, logout }}
+      value={{
+        user,
+        loading,
+        connectionError,
+        login,
+        signup,
+        loginAsGuest,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

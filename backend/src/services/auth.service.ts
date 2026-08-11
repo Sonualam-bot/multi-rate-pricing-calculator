@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { User } from "../models/User.model";
 import {
   EmailAlreadyExistsError,
@@ -21,6 +22,21 @@ export async function createUser(email: string, password: string) {
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   return User.create({ email, passwordHash });
+}
+
+/**
+ * Backs the "Continue as guest" button — generates a throwaway account
+ * with a random email/password and creates it through the normal
+ * createUser() path (same hashing, same uniqueness check, no duplicated
+ * logic). A fresh account per click, not one shared demo login, so two
+ * reviewers trying the app at the same time never see each other's
+ * documents, and there's nothing to seed in a freshly deployed database.
+ */
+export async function createGuestUser() {
+  const id = crypto.randomUUID();
+  const email = `guest-${id}@demo.mrpc.local`;
+  const password = crypto.randomUUID();
+  return createUser(email, password);
 }
 
 export async function verifyCredentials(email: string, password: string) {

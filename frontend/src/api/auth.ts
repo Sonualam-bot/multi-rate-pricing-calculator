@@ -14,6 +14,10 @@ export function login(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   });
 }
+export function guest() {
+  return request<User>("/auth/guest", { method: "POST" });
+}
+
 export function logout() {
   return request<void>("/auth/logout", { method: "POST" });
 }

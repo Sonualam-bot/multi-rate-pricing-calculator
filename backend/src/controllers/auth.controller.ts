@@ -5,6 +5,7 @@ import {
   verifyCredentials,
   generateToken,
   getUserById,
+  createGuestUser,
 } from "../services/auth.service";
 import { asyncHandler } from "../utils/asyncHandler";
 import { AuthedRequest } from "../middleware/requireAuth";
@@ -28,6 +29,13 @@ function setAuthCookie(res: Response, token: string) {
 export const signup = asyncHandler(async (req, res) => {
   const { email, password } = signupSchema.parse(req.body);
   const user = await createUser(email, password);
+  setAuthCookie(res, generateToken(user.id));
+  res.status(201).json({ id: user.id, email: user.email });
+});
+
+/** No request body — see services/auth.service.ts's createGuestUser() for what it creates. Otherwise identical to signup: issue a cookie, respond with the new user. */
+export const guest = asyncHandler(async (_req, res) => {
+  const user = await createGuestUser();
   setAuthCookie(res, generateToken(user.id));
   res.status(201).json({ id: user.id, email: user.email });
 });

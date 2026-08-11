@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { ApiError } from "../api/client";
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginAsGuest } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +17,24 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  /**
+   * Shares `submitting`/`error` with the form above rather than getting
+   * its own state — the two actions can't happen at once, and a shared
+   * `submitting` flag is what disables both buttons together so a click
+   * on one can't fire while the other's request is still in flight.
+   */
+  async function handleGuestLogin() {
+    setError(null);
+    setSubmitting(true);
+    try {
+      await loginAsGuest();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong");
     } finally {
@@ -68,6 +86,21 @@ export function LoginPage() {
           className="w-full rounded bg-blue-600 py-2 text-white disabled:opacity-50"
         >
           {submitting ? "Logging in..." : "Log in"}
+        </button>
+
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-gray-200" />
+          <span className="text-xs text-gray-400">or</span>
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleGuestLogin}
+          disabled={submitting}
+          className="w-full rounded border py-2 text-gray-700 disabled:opacity-50"
+        >
+          Continue as guest
         </button>
 
         <p className="text-center text-sm text-gray-600">
