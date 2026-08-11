@@ -5,6 +5,7 @@ import type {
   LineItemInput,
 } from "../types/document";
 import * as documentsApi from "../api/documents";
+import { ApiError } from "../api/client";
 
 /**
  * Owns one document's server state for the editor screen — fetch on
@@ -32,8 +33,9 @@ export function useDocument(id: string) {
       const doc = await documentsApi.getDocument(id);
       setDocument(doc);
     } catch (err) {
+      /** Same ApiError-aware fallback as useDocuments.ts's refresh() — see that comment for why a bare `instanceof Error` check isn't enough here. */
       setError(
-        err instanceof Error ? err.message : "Failed to load document",
+        err instanceof ApiError ? err.message : "Failed to load document",
       );
     } finally {
       setLoading(false);

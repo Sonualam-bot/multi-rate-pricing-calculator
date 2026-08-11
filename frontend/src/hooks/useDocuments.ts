@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { PricingDocument, CreateDocumentInput } from "../types/document";
 import * as documentsApi from "../api/documents";
+import { ApiError } from "../api/client";
 
 /**
  * Owns the documents-list screen's server state — fetches the list on
@@ -25,8 +26,16 @@ export function useDocuments() {
       const docs = await documentsApi.listDocuments();
       setDocuments(docs);
     } catch (err) {
+      /**
+       * ApiError-aware, not a bare `instanceof Error` check — a network
+       * failure (backend unreachable) throws a raw fetch TypeError, and
+       * without this check its message ("Failed to fetch") would leak
+       * straight into the UI instead of this readable fallback. The
+       * mutators below (createDocument/deleteDocument) already do this;
+       * this was the one place still using the looser check.
+       */
       setError(
-        err instanceof Error ? err.message : "Failed to load documents",
+        err instanceof ApiError ? err.message : "Failed to load documents",
       );
     } finally {
       setLoading(false);

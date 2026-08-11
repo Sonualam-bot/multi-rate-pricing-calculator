@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ReportSummary } from "../types/report";
 import * as reportsApi from "../api/reports";
+import { ApiError } from "../api/client";
 
 /**
  * Read-only — no mutators, unlike useDocuments/useDocument, because the
@@ -32,9 +33,10 @@ export function useReport(from: string, to: string) {
         if (!cancelled) setSummary(result);
       })
       .catch((err) => {
+        /** Same ApiError-aware fallback as useDocuments.ts's refresh() — see that comment for why a bare `instanceof Error` check isn't enough here. */
         if (!cancelled) {
           setError(
-            err instanceof Error ? err.message : "Failed to load report",
+            err instanceof ApiError ? err.message : "Failed to load report",
           );
         }
       })
