@@ -49,13 +49,10 @@ npm run dev             # starts on http://localhost:4000
 ```bash
 cd frontend
 npm install
-cp .env.example .env   # set VITE_API_URL to the backend's URL
 npm run dev             # starts on http://localhost:5173
 ```
 
-| Variable       | Description                                             |
-| -------------- | ------------------------------------------------------- |
-| `VITE_API_URL` | The backend's base URL (`http://localhost:4000` in dev) |
+No environment variables needed. The frontend talks to `/api/*` — a same-origin relative path, proxied to the backend by `vite.config.ts`'s dev server locally and by `vercel.json`'s rewrite in production, rather than pointing at the backend's own domain directly. This is deliberate, not just convenience: a cookie set across two different domains counts as a third-party cookie to the browser, which Chrome Incognito, Safari, and Firefox private mode all block by default regardless of `SameSite`/`Secure` flags. Proxying through one origin means the browser never sees a cross-site relationship to begin with, so the session cookie works everywhere, including private browsing.
 
 ### 4. Tests
 

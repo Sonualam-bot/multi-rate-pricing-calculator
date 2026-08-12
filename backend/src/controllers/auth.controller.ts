@@ -17,11 +17,25 @@ import { AuthedRequest } from "../middleware/requireAuth";
 
 const COOKIE_NAME = "token";
 
+/**
+ * httpOnly/secure/sameSite live here so setAuthCookie and logout's
+ * clearCookie both use the exact same values — Express's res.clearCookie()
+ * only actually removes a cookie if its options match what res.cookie()
+ * set (everything except expires/maxAge); a mismatch here is what let a
+ * "logged out" session keep working, since the stale JWT was still sitting
+ * in a cookie that was never really cleared.
+ */
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as
+    | "none"
+    | "lax",
+};
+
 function setAuthCookie(res: Response, token: string) {
   res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    ...COOKIE_OPTIONS,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
@@ -48,7 +62,7 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 export const logout = asyncHandler(async (_req, res) => {
-  res.clearCookie(COOKIE_NAME);
+  res.clearCookie(COOKIE_NAME, COOKIE_OPTIONS);
   res.status(204).send();
 });
 

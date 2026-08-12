@@ -1,4 +1,14 @@
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
+/**
+ * A relative path, not an absolute backend URL — every request goes
+ * through a same-origin /api/* proxy (vercel.json in production,
+ * vite.config.ts's dev server proxy locally) instead of hitting the
+ * backend's own domain directly. That's what makes the auth cookie
+ * first-party from the browser's point of view: it's set by (and sent
+ * back to) whatever origin is serving this page, never a different
+ * domain, so browsers that block third-party cookies — Chrome Incognito,
+ * Safari, Firefox private mode — never even see this as cross-site.
+ */
+const API_URL = "/api";
 
 export class ApiError extends Error {
   status: number;
